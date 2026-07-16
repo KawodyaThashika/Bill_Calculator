@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boarding Bill System</title>
+
+    <!-- Import Modern Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-app: hsl(220, 30%, 97%);
+            --bg-card: hsl(0, 0%, 100%);
+            --text-main: hsl(224, 71%, 19%);
+            --text-muted: hsl(220, 15%, 50%);
+            --accent: hsl(250, 84%, 54%);
+            --accent-hover: hsl(250, 84%, 48%);
+            --accent-light: hsl(250, 84%, 96%);
+            --success: hsl(142, 70%, 45%);
+            --success-light: hsl(142, 70%, 95%);
+            --warning: hsl(38, 92%, 50%);
+            --warning-light: hsl(38, 92%, 96%);
+            --error: hsl(0, 84%, 60%);
+            --error-light: hsl(0, 84%, 97%);
+            --border: hsl(220, 20%, 90%);
+            --border-focus: hsl(250, 84%, 75%);
+            --ring: rgba(99, 102, 241, 0.15);
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+
+            --shadow-card: 0 10px 30px -10px rgba(79, 70, 229, 0.08), 0 1px 3px rgba(79, 70, 229, 0.02);
+            --shadow-button: 0 4px 14px 0 rgba(79, 70, 229, 0.25);
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-app);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            line-height: 1.5;
+            transition: var(--transition);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 680px;
+            background: var(--bg-card);
+            padding: 36px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-card);
+            border: 1px solid var(--border);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Subtle background glow effect in card */
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--accent), hsl(190, 90%, 50%));
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header-logo {
+            width: 48px;
+            height: 48px;
+            background: var(--accent-light);
+            color: var(--accent);
+            border-radius: var(--radius-md);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+
+        .header h2 {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Alert Banner */
+        .alert-banner {
+            display: none;
+            align-items: flex-start;
+            gap: 10px;
+            background: var(--error-light);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: var(--error);
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            margin-bottom: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-banner svg {
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .label-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        label {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .helper-text {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 12px 12px 42px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-main);
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            outline: none;
+            transition: var(--transition);
+        }
+
+        input:focus {
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 4px var(--ring);
+            background-color: #fff;
+        }
+
+        input:focus+.input-icon {
+            color: var(--accent);
+        }
+
+        /* Row layout for dual inputs */
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .section-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 24px 0 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Dynamic Member Rows styling */
+        #members {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .member {
+            animation: slideDown 0.25s ease;
+        }
+
+        .member-input-group {
+            display: grid;
+            grid-template-columns: 2fr 1.2fr auto;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn-delete {
+            background: var(--error-light);
+            color: var(--error);
+            border: 1px solid rgba(239, 68, 68, 0.1);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 44px;
+            width: 44px;
+        }
+
+        .btn-delete:hover {
+            background: var(--error);
+            color: white;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+        }
+
+        /* Action Buttons Group */
+        .actions-group {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        .actions-group button {
+            flex: 1;
+            min-width: 140px;
+            padding: 14px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: none;
+        }
+
+        .btn-secondary {
+            background: var(--accent-light);
+            color: var(--accent);
+            border: 1px solid rgba(99, 102, 241, 0.15);
+        }
+
+        .btn-secondary:hover {
+            background: var(--accent);
+            color: white;
+            box-shadow: var(--shadow-button);
+        }
+
+        .btn-calculate {
+            background: var(--accent);
+            color: white;
+            box-shadow: var(--shadow-button);
+        }
+
+        .btn-calculate:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px 0 rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-calculate:active {
+            transform: translateY(1px);
+        }
+
+        .btn-print {
+            background: var(--bg-app);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+        }
+
+        .btn-print:hover {
+            background: var(--border);
+            transform: translateY(-1px);
+        }
+
+        /* Receipt Invoice Formatting */
+        .receipt {
+            background: var(--accent-light);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            position: relative;
+            border: 1px dashed rgba(79, 70, 229, 0.2);
+            margin-top: 30px;
+            animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .receipt-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px dashed rgba(79, 70, 229, 0.15);
+        }
+
+        .receipt-header-title {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+        }
+
+        .amount-display {
+            margin-top: 8px;
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .amount-currency {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent);
+            align-self: flex-start;
+            margin-top: 4px;
+        }
+
+        .amount-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        .receipt-table-wrapper {
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .receipt-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .receipt-table th,
+        .receipt-table td {
+            padding: 12px 16px;
+            font-size: 13px;
+            border: none;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+        }
+
+        .receipt-table th {
+            background: var(--bg-app);
+            color: var(--text-main);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+        }
+
+        .receipt-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .receipt-table td {
+            color: var(--text-main);
+        }
+
+        .receipt-table td.text-right,
+        .receipt-table th.text-right {
+            text-align: right;
+        }
+
+        .days-badge {
+            display: inline-flex;
+            align-items: center;
+            background: var(--accent-light);
+            color: var(--accent);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .receipt-footer {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-top: 16px;
+            border-top: 1px dashed rgba(79, 70, 229, 0.15);
+        }
+
+        .receipt-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .receipt-row .label {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .receipt-row .value {
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        .font-semibold {
+            font-weight: 600;
+        }
+
+        .font-bold {
+            font-weight: 700;
+        }
+
+        .text-accent {
+            color: var(--accent) !important;
+        }
+
+        /* Print Media Styles */
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+                padding: 0 !important;
+            }
+
+            .container {
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+                max-width: 100% !important;
+            }
+
+            .container::before,
+            .header,
+            .form-group,
+            .row,
+            .section-title,
+            #members,
+            .actions-group,
+            .alert-banner {
+                display: none !important;
+            }
+
+            .receipt {
+                border: none !important;
+                background: transparent !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            .receipt-table-wrapper {
+                border: 1px solid #000 !important;
+                background: white !important;
+            }
+
+            .receipt-table th {
+                background: #f3f4f6 !important;
+                color: black !important;
+                border-bottom: 2px solid #000 !important;
+            }
+
+            .receipt-table td {
+                border-bottom: 1px solid #ddd !important;
+                color: black !important;
+            }
+
+            .days-badge {
+                background: transparent !important;
+                color: black !important;
+                padding: 0 !important;
+                font-weight: 600 !important;
+            }
+
+            .text-accent {
+                color: black !important;
+            }
+        }
+
+        @media(max-width:600px) {
+            .row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .member-input-group {
+                grid-template-columns: 1fr;
+                gap: 8px;
+                background: var(--bg-app);
+                padding: 12px;
+                border-radius: var(--radius-md);
+                position: relative;
+            }
+
+            .btn-delete {
+                position: absolute;
+                top: 12px;
+                right: 12px;
+                width: 32px;
+                height: 32px;
+                padding: 6px;
+            }
+
+            .actions-group {
+                flex-direction: column;
+            }
+
+            .actions-group button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header">
+            <div class="header-logo">
+                <!-- Logo Icon (Receipt Outline) -->
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+            </div>
+            <h2>Boarding Bill System</h2>
+            <p>Calculate shared monthly bills split dynamically by stay period</p>
+        </div>
+
+        <!-- Alert Box for Error Validation -->
+        <div id="errorBanner" class="alert-banner">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <span id="errorMessage">Please correct the entries.</span>
+        </div>
+
+        <!-- Dynamic Form -->
+        <div class="row">
+            <div class="form-group">
+                <div class="label-group">
+                    <label for="bill">Total Monthly Bill (Rs.)</label>
+                </div>
+                <div class="input-wrapper">
+                    <div class="input-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="1" x2="12" y2="23"></line>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                    </div>
+                    <input id="bill" type="number" value="11000" min="0" step="any" placeholder="Enter amount">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="label-group">
+                    <label for="days">Total Days</label>
+                </div>
+                <div class="input-wrapper">
+                    <div class="input-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                    </div>
+                    <input id="days" type="number" value="61" min="1" placeholder="Total bill days">
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">
+            <span>Boarders & Stay Days</span>
+            <span class="helper-text">Stay days must not exceed total days</span>
+        </div>
+
+        <div id="members">
+            <div class="member">
+                <div class="member-input-group">
+                    <div class="input-wrapper">
+                        <div class="input-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                        </div>
+                        <input class="name" value="Person 1" placeholder="Name">
+                    </div>
+                    <div class="input-wrapper">
+                        <div class="input-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                        </div>
+                        <input class="stay" type="number" value="39" min="0" placeholder="Stay Days">
+                    </div>
+                    <button class="btn-delete" onclick="removeMember(this)" type="button" title="Remove boarder">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                            </path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="member">
+                <div class="member-input-group">
+                    <div class="input-wrapper">
+                        <div class="input-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                        </div>
+                        <input class="name" value="Person 2" placeholder="Name">
+                    </div>
+                    <div class="input-wrapper">
+                        <div class="input-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                        </div>
+                        <input class="stay" type="number" value="39" min="0" placeholder="Stay Days">
+                    </div>
+                    <button class="btn-delete" onclick="removeMember(this)" type="button" title="Remove boarder">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                            </path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions-group">
+            <button onclick="addMember()" class="btn-secondary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>Add Member</span>
+            </button>
+
+            <button onclick="calculate()" class="btn-calculate">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                </svg>
+                <span>Calculate Bill</span>
+            </button>
+
+            <button onclick="window.print()" class="btn-print">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                    <rect x="6" y="14" width="12" height="8"></rect>
+                </svg>
+                <span>Print Bill</span>
+            </button>
+        </div>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function showAlert(message) {
+            const errorBanner = document.getElementById("errorBanner");
+            const errorMessage = document.getElementById("errorMessage");
+            errorMessage.textContent = message;
+            errorBanner.style.display = "flex";
+            document.getElementById("result").style.display = "none";
+        }
+
+        function hideAlert() {
+            document.getElementById("errorBanner").style.display = "none";
+            document.getElementById("result").style.display = "block";
+        }
+
+        function removeMember(btn) {
+            let memberRow = btn.closest(".member");
+            if (document.querySelectorAll(".member").length > 1) {
+                memberRow.remove();
+            } else {
+                showAlert("You must have at least one boarder.");
+            }
+        }
+
+        function addMember() {
+            hideAlert();
+            let div = document.createElement("div");
+            div.className = "member";
+            div.innerHTML = `
+                <div class="member-input-group">
+                    <div class="input-wrapper">
+                        <div class="input-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                        </div>
+                        <input class="name" value="New Person" placeholder="Name">
+                    </div>
+                    <div class="input-wrapper">
+                        <div class="input-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                        </div>
+                        <input class="stay" type="number" value="0" min="0" placeholder="Stay Days">
+                    </div>
+                    <button class="btn-delete" onclick="removeMember(this)" type="button" title="Remove boarder">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                    </button>
+                </div>
+            `;
+            document.getElementById("members").appendChild(div);
+        }
+
+        function calculate() {
+            hideAlert();
+
+            let bill = parseFloat(document.getElementById("bill").value);
+            let totalDays = parseFloat(document.getElementById("days").value);
+
+            let names = document.querySelectorAll(".name");
+            let stays = document.querySelectorAll(".stay");
+
+            if (isNaN(bill) || isNaN(totalDays)) {
+                showAlert("Please fill in the Total Monthly Bill and Total Days.");
+                return;
+            }
+
+            if (bill < 0 || totalDays <= 0) {
+                showAlert("Please enter valid positive values for Monthly Bill and Total Days.");
+                return;
+            }
+
+            let members = [];
+            let totalCalculated = 0;
+
+            let dailyRate = bill / totalDays;
+            let perPersonDaily = dailyRate / names.length;
+
+            for (let i = 0; i < names.length; i++) {
+                let nameVal = names[i].value.trim() || `Person ${i + 1}`;
+                let stayDays = parseFloat(stays[i].value);
+
+                if (isNaN(stayDays) || stayDays < 0) {
+                    showAlert(`Please enter valid stay days for ${nameVal}.`);
+                    return;
+                }
+
+                if (stayDays > totalDays) {
+                    showAlert(`Stay days for ${nameVal} (${stayDays} days) cannot be greater than total days (${totalDays} days).`);
+                    return;
+                }
+
+                let amount = perPersonDaily * stayDays;
+
+                members.push({
+                    name: nameVal,
+                    days: stayDays,
+                    amount: amount
+                });
+
+                totalCalculated += amount;
+            }
+
+            // Remaining balance adjustment to the last member to avoid precision roundoff drift
+            let difference = bill - totalCalculated;
+            if (members.length > 0) {
+                members[members.length - 1].amount += difference;
+            }
+
+            // Modern Receipt Layout HTML Generation
+            let html = `
+                <div class="receipt">
+                    <div class="receipt-header">
+                        <span class="receipt-header-title">Payment Summary</span>
+                        <div class="amount-display">
+                            <span class="amount-currency">Rs.</span>
+                            <span>${bill.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        </div>
+                        <div class="amount-label">Total Shared Bill</div>
+                    </div>
+                    
+                    <div class="receipt-table-wrapper">
+                        <table class="receipt-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Days</th>
+                                    <th class="text-right">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+
+            members.forEach(m => {
+                html += `
+                    <tr>
+                        <td class="font-semibold">${m.name}</td>
+                        <td>
+                            <span class="days-badge">${m.days} Days</span>
+                        </td>
+                        <td class="text-right font-bold text-accent">Rs. ${m.amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="receipt-footer">
+                        <div class="receipt-row">
+                            <span class="label">Total Boarders</span>
+                            <span class="value">${members.length} Members</span>
+                        </div>
+                        <div class="receipt-row">
+                            <span class="label">Daily Rate (Overall)</span>
+                            <span class="value">Rs. ${(dailyRate).toFixed(2)} / day</span>
+                        </div>
+                        <div class="receipt-row">
+                            <span class="label">Daily Rate (Per Boarder)</span>
+                            <span class="value">Rs. ${(perPersonDaily).toFixed(2)} / day</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById("result").innerHTML = html;
+        }
+
+        // Auto-run calculation on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            calculate();
+        });
+    </script>
+</body>
+
+</html>
